@@ -11,7 +11,7 @@ const month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SE
 
 const ranges = { hours: [6, 21] }
 
-let table_date;
+let table_date = new Date();
 
 let time_slots = [];
 
@@ -20,7 +20,6 @@ function regenerate_table() {
     let num_days = days.value;
     let tr = document.createElement('tr');
 
-    table_date = new Date();
     let date = new Date(table_date);
     for (let i = 0; i < num_days; i++) {
         let th = document.createElement('th');
@@ -64,14 +63,45 @@ function elem_size_resize(e) {
 
 days.addEventListener('input', elem_size_resize);
 
-function create_time(e) {
+function create_time(time, length, td) {
+
+    if (td === undefined) {
+        let column = Math.ceil((time.getTime() - table_date.getTime()) / (1000 * 60 * 60 * 24));
+        td = tbody.children[time.getHours() - ranges.hours[0]].children[column];
+    }
+
+    let wrap_size = t_wrap.getBoundingClientRect();
+
+    let td_size = td.getBoundingClientRect();
+
+    let hour = time.getHours();
+    let minute = time.getMinutes();
+    let min_quarter = Math.floor(minute / 15);
+
+    let time_slot = document.createElement('div');
+
+    time_slot.classList.add('time-slot', 'bg-primary', 'rounded', 'border', 'border-secondary', 'badge', 'px-0', 'text-center');
+
+    // Position styling
+    time_slot.style.position = 'absolute';
+    time_slot.style.left = `${td_size.left - wrap_size.left}px`;
+    time_slot.style.top = `${(td_size.top - wrap_size.top) + min_quarter * (td_size.height / 4)}px`;
+    time_slot.style.width = `${td_size.width}px`;
+    time_slot.style.height = `${td_size.height}px`;
+
+    time_slot.innerText = `${(hour % 12) || 12}:${minute < 10 ? '0' : ''}${minute} ${hour < 12 ? 'AM' : 'PM'}`;
+    t_wrap.appendChild(time_slot);
+
+    time_slots.push({ time_slot: time, length: length, elem: time_slot });
+}
+
+function create_click(e) {
     if (tbody.contains(e.target) && e.target.tagName == 'TD') {
         let wrap_size = t_wrap.getBoundingClientRect();
         let x = e.clientX - wrap_size.left; //x position within the element.
         let y = e.clientY - wrap_size.top;  //y position within the element.
 
         if (x > 0 && y > thead.getBoundingClientRect().height) {
-
             let td = e.target;
             let tr = td.parentElement;
 
@@ -87,25 +117,12 @@ function create_time(e) {
             date.setHours(hour);
             date.setMinutes(minute);
 
-            let time = document.createElement('div');
-            // Position styling
-            time.style.position = 'absolute';
-            time.style.left = `${td_size.left - wrap_size.left}px`;
-            time.style.top = `${(td_size.top - wrap_size.top) + min_quarter * (td_size.height / 4)}px`;
-            time.style.width = `${td_size.width}px`;
-            time.style.height = `${td_size.height}px`;
-
-            time.classList.add('time-slot', 'bg-primary', 'rounded', 'border', 'border-secondary', 'badge', 'px-0', 'text-center');
-
-            time.innerText = `${(hour % 12) || 12}:${minute < 10 ? '0' : ''}${minute} ${hour < 12 ? 'AM' : 'PM'}`;
-            t_wrap.appendChild(time);
-
-            time_slots.push({ time: date, length: 60, elem: time });
+            create_time(date, 60, td);
         }
     }
 }
 
-t_wrap.addEventListener('click', create_time);
+t_wrap.addEventListener('click', create_click);
 
 elem_size_resize({ target: days });
 regenerate_table();
