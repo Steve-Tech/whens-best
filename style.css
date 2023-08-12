@@ -1,0 +1,43 @@
+.time-slot {
+    font-size: 0.75em;
+    padding-top: 0.45em;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+}
+
+.min30 {
+    font-size: 0.5em;
+}
+
+.min15 {
+    font-size: 0.25em;
+}
+
+.time-slot:before, .time-slot:after {
+    content: '';
+    background-color: var(--bs-white);
+    border-radius: 50%;
+    border: 0.2rem solid var(--bs-red);
+    position: absolute;
+    left: 50%;
+    width: 1em;
+    height: 1em;
+    transform: translateX(-50%);
+    transition: border-color 0.5s;
+}
+
+.time-slot:before {
+    top: -0.4rem;
+}
+.time-slot:after {
+    bottom: -0.4rem;
+}
+
+.time-slot:hover:before, .time-slot:hover:after {
+    border: 0.2rem solid var(--bs-green);
+}
